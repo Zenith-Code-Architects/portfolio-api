@@ -2,7 +2,7 @@ import { ProjectModel } from "../models/projects.js";
 import { UserModel } from "../models/user.js";
 import { project_schema } from "../schema/projects_schema.js";
 
-export const addProject = async (req, res) => {
+export const addProject = async (req, res, next) => {
     try {
         // Validate project data
         const { error, value } = project_schema.validate(req.body);
@@ -11,7 +11,7 @@ export const addProject = async (req, res) => {
         }
 
         // Get user ID from session
-        const userSessionId = req.session.user.id;
+        const userSessionId = req.session?.user?.id || req?.user?.id;
 
         // Find the user by userSessionId
         const user = await UserModel.findById(userSessionId);
@@ -27,27 +27,53 @@ export const addProject = async (req, res) => {
         await user.save();
 
         // Return success response with created project
-        res.status(201).json({ project });
+        res.status(201).json({ 
+            message: 'Project added',
+            project });
     } catch (error) {
         // Handle errors
-        console.error("Error adding project:", error);
-        res.status(500).send(error.message);
+       next(error)
     }
 };
 
 export const getAllUserProjects = async (req, res, next) => {
     try {
         // Get user ID from session
-        const userSessionId = req.session.user.id;
+        const userSessionId = req.session?.user?.id || req?.user?.id;
 
         // Find all projects belonging to the user
         const allUserProjects = await ProjectModel.find({ user: userSessionId });
-        if (allUserProjects.length === 0) {
-            return res.status(404).json('No projects found');
-        }
+        // if (allUserProjects.length === 0) {
+        //     return res.status(200).json(allUserProjects);
+        // }
 
         // Return projects in the response
-        res.status(200).json({ projects: allUserProjects });
+        res.status(200).json({ 
+            message: 'Projects retrieved',
+            projects: allUserProjects });
+    } catch (error) {
+        // Pass error to error handling middleware
+        next(error);
+    }
+};
+
+export const getProjectById = async (req, res, next) => {
+    try {
+        // Get user ID from session
+        const userSessionId = req.session?.user?.id || req?.user?.id;
+
+        // Find project by ID and user
+        const project = await ProjectModel.findById(req.params.id);
+
+        // Check if project exists and belongs to the user
+        if (!project || project.user.toString() !== userSessionId.toString()) {
+            return res.status(200).json(project);
+        }
+
+        // Return the project in the response
+        res.status(200).json({ 
+            message: 'Project retrieved',
+            project });
     } catch (error) {
         // Pass error to error handling middleware
         next(error);
@@ -57,9 +83,20 @@ export const getAllUserProjects = async (req, res, next) => {
 
 export const updateProjects = async (req, res, next) => {
     try {
+        // validate
+        const { error, value } = project_schema.validate(req.body);
+        if (error) {
+            return res.status(400).send(error.details[0].message);
+        }
+
+        const userSessionId = req.session?.user?.id || req?.user?.id;
+        const user = await UserModel.findById(userSessionId);
+        if (!user) {
+            return res.status(404).send("User not found");
+        }
         // Find project by ID and update it
         const updatedProject = await ProjectModel
-            .findByIdAndUpdate(req.params.id, req.body, { new: true });
+            .findByIdAndUpdate(req.params.id, value, { new: true });
 
         // Check if project was found and updated
         if (!updatedProject) {
@@ -67,7 +104,9 @@ export const updateProjects = async (req, res, next) => {
         }
 
         // Return updated project in the response
-        res.status(200).json(updatedProject);
+        res.status(200).json({ 
+            message: 'Project updated',
+            updatedProject });
     } catch (error) {
         // Pass error to error handling middleware
         next(error);
@@ -76,6 +115,11 @@ export const updateProjects = async (req, res, next) => {
 
 export const deleteProject = async (req, res, next) => {
     try {
+        const userSessionId = req.session?.user?.id || req?.user?.id;
+        const user = await UserModel.findById(userSessionId);
+        if (!user) {
+            return res.status(404).json("User not found")
+        }
         // Delete project by ID
         const deletedProject = await ProjectModel.findByIdAndDelete(req.params.id);
 
@@ -83,18 +127,16 @@ export const deleteProject = async (req, res, next) => {
         if (!deletedProject) {
             return res.status(404).json('Project not found');
         }
-
         // Remove project ID from user's projects array
-        const user = await UserModel.findById(req.session.user.id);
-        if (user) {
-            user.projects = user.projects.filter(projectId => projectId.toString() !== req.params.id);
-            await user.save();
-        }
-
+        user.projects.pull(req.params.id)
+        await user.save();
         // Return success message in the response
-        res.status(200).json('Deleted');
+        res.status(200).json({
+            message: 'Project deleted',
+        deleteProject});
     } catch (error) {
         // Pass error to error handling middleware
         next(error);
     }
 };
+

@@ -1,4 +1,4 @@
-import { checkEmailExists, checkUsernameExists, login, logout, portfolio, signUp } from "../controllers/user.js";
+import { getUsers, login, logout, portfolio, signUp, token } from "../controllers/user.js";
 import { Router } from "express";
 import { checkUserSession } from "../middleware/auth.js";
 
@@ -6,17 +6,17 @@ import { checkUserSession } from "../middleware/auth.js";
 const userRouter = Router();
 
 // Define routes
-userRouter.get('/signup', checkEmailExists);
+userRouter.get('/user', getUsers );
 
-userRouter.get('/signup', checkUsernameExists);
+userRouter.post('/user/auth/signup', signUp);
 
-userRouter.post('/signup', signUp);
+userRouter.post('/user/auth/session/login', login);
 
-userRouter.post('/login', login);
+userRouter.post('/user/auth/token/login', token);
 
-userRouter.post('/logout', checkUserSession, logout);
+userRouter.post('/user/auth/logout', checkUserSession, logout);
 
-userRouter.get('/portfolio', checkUserSession, portfolio)
+userRouter.get('/user/portfolio/:userName', portfolio)
 
 // export router
 export default userRouter 

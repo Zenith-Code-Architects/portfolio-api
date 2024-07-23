@@ -10,10 +10,10 @@ export const userProfile_schema = Joi.object({
     dateOfBirth: Joi.string(),
     contact: Joi.string(),
     resume: Joi.string(),
-    // spokenLanguages: Joi.array().items(Joi.string()),
-    spokenLanguages: Joi.string(),
+    spokenLanguages: Joi.array().items(Joi.string()),
+    // spokenLanguages: Joi.string(),
     github: Joi.string(),
     linkedln: Joi.string(),
     twitter: Joi.string(),
-    user: Joi.string().required()
+    user: Joi.string()
 })

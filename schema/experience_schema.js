@@ -11,5 +11,5 @@ export const experience_schema = Joi.object({
     endDate: Joi.string(),
     employmentType: Joi.string()
         .valid('full-time', 'part-time', 'self-employed', 'freelance', 'contract', 'internship'),
-    user: Joi.string().required()
+    user: Joi.string()
 })

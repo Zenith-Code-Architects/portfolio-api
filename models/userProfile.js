@@ -12,7 +12,7 @@ const userProfileSchema = new Schema({
     dateOfBirth: { type: Date },
     contact: { type: String },
     resume: { type: String },
-    spokenLanguages: { type: String },
+    spokenLanguages: [{ type: String }],
     github: { type: String },
     linkedln: { type: String },
     twitter: { type: String }

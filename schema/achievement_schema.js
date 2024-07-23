@@ -6,5 +6,5 @@ export const achievement_schema = Joi.object({
     image: Joi.string(),
     date: Joi.string().required(),
     nameOfInstitution: Joi.string().required(),
-    user: Joi.string().required()
+    user: Joi.string()
 })

@@ -9,5 +9,5 @@ export const project_schema = Joi.object({
     nameOfInstitution: Joi.string(),
     startDate: Joi.string(),
     endDate: Joi.string(),
-    user: Joi.string().required()
+    user: Joi.string()
 })

@@ -8,5 +8,5 @@ export const education_schema = Joi.object({
     grade: Joi.string(),
     startDate: Joi.string(),
     endDate: Joi.string(),
-    user: Joi.string().required()
+    user: Joi.string()
 })
